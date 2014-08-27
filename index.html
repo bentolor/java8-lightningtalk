@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Java 8: A quick overview over the good parts - Writing Java has never been so fun</title>
+
+    <meta name="description" content="Java 8: A quick overview over the good parts">
+    <meta name="author" content="Benjamin Schmid | @bentolor">
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <link href='http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/lt.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+        document.write('<link rel="stylesheet" href="css/print/' + ( window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">');
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+<!-- Any section element inside of this container is displayed as a slide -->
+<div class="slides">
+
+<section>
+    <h1 style="margin: 50px 0 .3em">Java 8<br/>The good parts</h1>
+
+    <h3 style="font-size:1.2em;margin-bottom:2em">Writing Java has never been so fun</h3>
+
+    <p style="text-align: right">
+        <a href="https://github.com/bentolor">@bentolor</a>
+    </p>
+</section>
+
+<section>
+    <h2>Table of contents</h2>
+
+    <div id="table-of-contents"></div>
+</section>
+
+<section class="glow">
+    <section>
+        <h2 class="slide-header">Java 8 is <em>big</em></h2>
+        <h5>Language</h5>
+        <ul>
+            <li>Lambdas &amp; Functional Interfaces</li>
+            <li>Method References</li>
+            <li>Default Methods</li>
+            <li>Better annotations</li>
+            <li>Better Type Inference</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Java 8 is <em>big</em></h2>
+        <h5>Runtime library</h5>
+        <ul>
+            <li>Streams</li>
+            <li>Optional</li>
+            <li>Multicore Support (Parallel)</li>
+            <li>Native Javascript</li>
+            <li>Many Goodies</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Java 8 is <em>big</em></h2>
+        <h5>Compiler &amp; Tools</h5>
+        <ul>
+            <li>Reflection: Parameter names</li>
+            <li>CLI: jjs (Nashorn)</li>
+            <li>CLI: jdeps</li>
+            <li>Death of PermGen</li>
+        </ul>
+    </section>
+
+</section>
+
+<section>
+    <h2 class="slide-header" style="font-size:3em;margin-top: 50px">Language changes</h2>
+</section>
+
+<section>
+
+    <section>
+        <h2 class="slide-header">Lambdas</h2>
+
+        <p>Basic form</p>
+        <pre><code class="java">(params) -> expression
+(params) -> statement
+(params) -> { statements }</code></pre>
+
+        <p class="tgap">A simple example (no parameters):</p>
+        <pre><code class="java">Runnable r = () -> System.out.println("Hello!");
+r.run();</code></pre>
+
+        <p class="tgap">Example with parameter (Type inferred!)<p>
+        <pre><code class="java">Arrays.asList( "a", "b", "d" ).forEach( e -> System.out.println( e ) );</code></pre>
+    </section>
+
+    <section>
+        <h2>Lambdas</h2>
+
+        <p>Lambdas can access outer field / variables if they are <em>(effectively)</em> final</p>
+        <pre><code class="java">String separator = ",";
+Arrays.asList( "a", "b", "d" )
+    .forEach( (String e) -> System.out.print(e+separator) );
+
+//separator = ";"   // would break!</code></pre>
+
+        <p class="tgap">Lambdas may return values (inline/explicit)</p>
+        <pre><code class="java">Arrays.asList( "a", "b", "d" ).sort( ( e1, e2 ) -> e1.compareTo( e2 ) );
+
+// or:
+Arrays.asList( "a", "b", "d" ).sort( ( e1, e2 ) -> {
+    return e1.compareTo( e2 );
+} );        </code></pre>
+    </section>
+
+</section>
+
+<section>
+
+    <section>
+        <h2 class="slide-header">Functional interfaces</h2>
+        <pre><code class="java">Comparator &lt;Apple&gt; c =
+     (Apple a1, Apple a2) -> a1.getWeight().compareTo(a2.getWeight());</code></pre>
+
+            <h5 class="fragment tgap">Wait, wait, wait... Comparator? How does this work?</h5>
+            <pre class="fragment"><code class="java">@FunctionalInterface
+public interface Comparator&lt;T&gt; {
+    int compare(T o1, T o2);
+}</code></pre>
+    </section>
+
+    <section>
+        <h2><code>@FunctionalInterface</code></h2>
+
+        <p> Conceptually, a functional interface has exactly <strong>one abstract
+            method.</strong>  As such, it may be implicitly converted to a lambda expression.</p>
+
+        <p>Note that <strong>instances of functional interfaces</strong> can be created with
+            <em>lambda expressions</em> or method/constructor references. </p>
+
+        <p><strong>But:</strong> To avoid breakage by accidently adding further methods , these
+            interfaces must be explicitly tagged with <code>@FunctionalInterface</code>.
+        </p>
+
+    </section>
+
+</section>
+
+
+<section>
+
+    <section>
+        <h2 class="slide-header">Interface <code>default</code> methods</h2>
+        <p>In Java 8 you can write:</p>
+        <pre><code class="java">List&lt;Integer&gt; numbers = Arrays.asList(3, 5, 1, 2, 6);
+numbers.sort(Comparator.naturalOrder());</code></pre>
+
+        <p class="tgap fragment">Huh? <code>java..util.List</code> now requires a <code>sort()</code>-Method?<br/>Will all of my code break now?</p>
+
+        <pre class="fragment"><code class="java">public interface List&lt;E&gt; extends Collection&ltE&gt; {
+    // ...
+    default void sort(Comparator&lt;? super E&gt; c) {
+        // ...
+    }
+}</code></pre>
+    </section>
+
+    <section>
+        <h2 class="slide-header">Interface <code>static</code> methods</h2>
+        <pre><code class="java">private interface PersonFactory {
+    // Interfaces now allow static methods
+    static Integer createPerson( String firstname, String lastname ) {
+        return new Person(firstname, lastname);
+    }
+}</code></pre>
+    </section>
+
+</section>
+
+<section>
+    <section>
+        <h2 class="slide-header">Method references</h2>
+
+        <p>Given the following interface</p>
+        <pre><code class="java mb-30">public interface MyFormatter&lt;T&gt; {
+    String format(T object);
+}
+
+public &lt;T&gt; String format(T o,  MyFormatter&lt;T&gt; formatter) {
+    return formatter.format(o);
+}</code></pre>
+
+        <div class="fragment tgap">
+            <p>We can simply reuse existing other implementations</p>
+            <pre><code class="java">format(32, Integer::toHexString)</code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2 >Supported method references</h2>
+        <ul>
+            <li><strong>static method:</strong> 	<code>Class::staticMethodName</code></li>
+            <li><strong>instance method of a <em>particular</em> object</strong> <code>object::methodName</code></li>
+            <li><strong>instance method of an <em>arbitrary</em> object</strong> <code>Type::methodName</code></li>
+            <li><strong>constructor:</strong>	<code>ClassName::new</code></li>
+        </ul>
+    </section>
+</section>
+
+
+
+<section>
+    <h2 class="slide-header" style="font-size:3em;margin-top: 50px">Runtime library enhancement</h2>
+</section>
+
+
+<section>
+    <section>
+        <h2 class="slide-header">Streams</h2>
+
+        <pre><code class="java mb-30">Collection&lt;Task&gt; tasks = getTasks();
+long totalPointsOfOpenTasks = tasks
+    .stream()
+    .filter( task -> task.getStatus() == Status.OPEN )
+    .mapToInt( Task::getPoints )
+    .sum();
+
+System.out.println( "Total points: " + totalPointsOfOpenTasks );</code></pre>
+    </section>
+
+    <section>
+        <h2 class="slide-header">Stream operations</h2>
+
+        <h4>Are divivided into</h4>
+        <ul class="mb-30">
+            <li><em>Intermediate operations</em> (returning another <code>Stream&lt;T&gt;</code>)</li>
+            <li><em>Terminal operations</em> (returning the final result)</li>
+        </ul>
+
+        <h4>Parallel processing</h4>
+        <p>Out-of-the box support of parallel processing (Multi-threading!)</p>
+        <p><pre><code>stream.parallel()</code></pre></p>
+    </section>
+
+    <section>
+        <h2 class="slide-header">Complex stream example</h2>
+
+        <pre><code class="java mb-30">// Calculate the weight of each tasks (as percent of total points)
+final Collection&lt;String&gt; result = tasks
+        .stream()                                        // Stream&lt;String&gt;
+        .mapToInt( Task::getPoints )                     // IntStream
+        .asLongStream()                                  // LongStream
+        .mapToDouble( points -> points / totalPoints )   // DoubleStream
+        .boxed()                                         // Stream&lt;Double&gt;
+        .mapToLong( weigth -> ( long )( weigth * 100 ) ) // LongStream
+        .mapToObj( percentage -> percentage + "%" )      // Stream&lt;String&gt;
+        .collect( Collectors.toList() );                 // List&lt;String&gt;
+
+System.out.println( result );</code></pre>
+    </section>
+
+</section>
+
+<section>
+    <h2 class="slide-header">Optional</h2>
+    <p>Allows you to commit to a non-<code>null</code> convention in your project
+        <br/> &amp; offers some convenience. </p>
+
+    <pre><code class="java mb-30">Optional&lt;String&gt; fullName = Optional.ofNullable( null );</code></pre>
+
+    <pre><code  class="java mb-30">log.info( "Full Name is set? " + fullName.isPresent() );
+log.info( "Full Name: " + fullName.orElseGet( () -> "[none]" ) );
+log.info( fullName.map( s -> "Hey " + s + "!" ).orElse( "Hey Stranger!" ) );</code></pre>
+
+    <p>No more <code>NullPointerException</code>?</p>
+</section>
+
+<section>
+    <h2 class="slide-header">Native Javascript Support (Nashorn)</h2>
+    <h5>Use / Run Javascript in your code:</h5>
+    <pre><code class="java mb-30">ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName( "JavaScript" );
+
+        System.out.println( engine.eval( "function f() { return 1; }; f() + 1;" ) );</code></pre>
+
+    <h5>From command line</h5>
+    <pre><code class="mb-30">jjs server.js</code></pre>
+
+</section>
+
+<section>
+    <section>
+        <h2 class="slide-header" style="font-size:3em;margin-top: 50px">Smaller goodies</h2>
+    </section>
+
+    <section>
+        <h2 class="slide-header">Better Annotations</h2>
+
+        <h5>Repeatable</h5>
+        <pre><code class="java mb-30">@Filter( "filter1" )
+@Filter( "filter2" )
+public interface Filterable { }</code></pre>
+
+        <h5>... assigned to variables, constructors, maps, casts, ...</h5>
+        <pre><code class="java mb-30">@NotNull String myString = "Foo"
+new @Interned MyObject()
+myString = (@NonNull String) myObject;</code></pre>
+
+        <h5>... used in Generics</h5>
+        <pre><code class="java mb-30">List<@Email String> emails = ...</code></pre>
+
+        <h5>... and more!</h5>
+    </section>
+
+    <section>
+        <h2 class="slide-header" style="font-size:3em;margin-top: 50px">Better type inference</h2>
+    </section>
+
+    <section>
+        <h2 class="slide-header">Parameter names</h2>
+
+        <pre><code class="java mb-30">Method method = ParameterNames.class.getMethod( "main", String[].class );
+            for( final Parameter parameter: method.getParameters() ) {
+            System.out.println( "Parameter: " + parameter.getName() );
+            }</code></pre>
+    </section>
+
+    <section>
+        <h2 class="slide-header"> Date/Time API (JSR 310)</h2>
+
+        <ul>
+            <li>More convenience & easier operations. </li>
+            <li>Time-zone less data types (i.e. <code>LocalDate</code>) </li>
+        </ul>
+    </section>
+
+    <section>
+        <h2 class="slide-header"><code>java.util.Base64</code></h2>
+    </section>
+
+    <section>
+        <h2 class="slide-header">Better Multithreading support</h2>
+
+        <ul>
+            <li><code>list.parallelStream()</code></li>
+            <li><code>stream.parallel()</code></li>
+            <li><code>ConcurrentMap.parallelStream()</code></li>
+            <li><code>Arrays.parallelSort()</code></li>
+            <li><code>Arrays.parallelSetAll()</code></li>
+        </ul>
+    </section>
+
+    <section>
+        <h2 class="slide-header">Small enhancements in <code>java.util.concurrent</code></h2>
+    </section>
+
+
+</section>
+
+<section>
+    <section>
+        <h2 class="slide-header" style="font-size:3em;margin-top: 50px">Tools & JVM</h2>
+    </section>
+
+    <section>
+        <h2 class="slide-header">jdeps</h2>
+        <p>Class dependency analyzer</p>
+
+<pre><code class="mb-30">$ jdeps org.springframework.core-3.0.5.RELEASE.jar
+org.springframework.core-3.0.5.RELEASE.jar -> lib\rt.jar
+   org.springframework.core (org.springframework.core-3.0.5.RELEASE.jar)
+      -> java.io
+      -> java.lang
+      -> java.lang.annotation
+      -> java.lang.ref
+      -> java.lang.reflect
+      -> java.util
+      -> java.util.concurrent
+      -> org.apache.commons.logging                         not found
+      -> org.springframework.asm                            not found
+   org.springframework.core.annotation (org.springframework.core-3.0.5.RELEASE.jar)
+      -> java.lang
+      -> java.lang.annotation
+      -> java.lang.reflect
+      -> java.util</code></pre>
+    </section>
+
+    <section>
+        <h2 class="slide-header">PermGen is now <br/><a href="http://www.javacodegeeks.com/2013/02/java-8-from-permgen-to-metaspace.html">MetaSpace</a></h2>
+    </section>
+</section>
+
+
+<section>
+    <h2 class="slide-header">Resources</h2>
+    <ul>
+        <li><a href="http://www.javacodegeeks.com/2014/05/java-8-features-tutorial.html#new_java_tools">Java 8 Features – The ULTIMATE Guide</a></li>
+        <li><a href="http://java.dzone.com/articles/whats-wrong-java-8-part-vi">Whats wrong with Java 8</a></li>
+        <li><a href="http://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#StreamOps">Streams API</a></li>
+    </ul>
+</section>
+
+<section>
+    <h3 style="font-size:3em;margin-top:30px;margin-bottom:.5em">Thank you :)</h3>
+</section>
+
+</div>
+
+</div>
+<!--<iframe src="http://ghbtns.com/github-btn.html?user=bentolor&repo=java8-lightningtalk&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20" style="position: absolute; top: 20px; left: 20px; z-index: 9999"></iframe>
+<a href="https://github.com/bentolor/java8-lightningtalk" style="position: absolute; top: 0; right: 0; z-index: 9999">
+<img style="border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub">
+</a>-->
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.min.js"></script>
+
+<script>
+
+    // Full list of configuration options available here:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        rollingLinks: false,
+        slideNumber: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: 'linear', // default/cube/page/concave/linear(2d)
+        mouseWheel: true,
+        parallaxBackgroundImage: 'http://demo.thinkupthemes.com/spirits/wp-content/themes/Spirits/demo/images/background/background5.jpg',
+        parallaxBackgroundSize: '1626px 1229px', //  1229px // CSS syntax, e.g. "2100px 900px"
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+            { src: 'lib/js/highlight.js', async: true, callback: function () {
+                window.hljs.initHighlightingOnLoad();
+            } },
+            { src: 'lib/js/classList.js', condition: function () {
+                return !document.body.classList;
+            } },
+            { src: 'lib/js/showdown.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            } },
+            { src: 'lib/js/data-markdown.js', condition: function () {
+                return !!document.querySelector('[data-markdown]');
+            } },
+            { src: 'plugin/zoom-js/zoom.js', condition: function () {
+                return !!document.body.classList;
+            } },
+            { src: '/socket.io/socket.io.js', async: true, condition: function () {
+                return window.location.host === 'localhost:1947';
+            } },
+            { src: 'plugin/speakernotes/client.js', async: true, condition: function () {
+                return window.location.host === 'localhost:1947';
+            } }
+        ]
+    });
+
+</script>
+<script src="js/zepto.min.js"></script>
+<script>
+    Zepto(function ($) {
+
+        var tableOfContents = $('#table-of-contents');
+        var tableList = $('<ol />')
+
+        $('.slide-header').each(function (index) {
+            var _self = $(this),
+                    hash = '#/' + _self.closest('section').index();
+
+            tableList.append([
+                '<li>',
+                        '<a href="' + hash + '">',
+                _self.text(),
+                '</a>',
+                '</li>'
+            ].join(''));
+
+        });
+
+        tableOfContents.html(tableList);
+    });
+</script>
+<!--<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-xxxx', 'xxx');
+ga('send', 'pageview');
+</script>-->
+</body>
+</html>
