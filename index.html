@@ -43,7 +43,7 @@
     <h3 style="font-size:1.2em;margin-bottom:2em">Writing Java has never been so fun</h3>
 
     <p style="text-align: right">
-        <a href="https://github.com/bentolor">@bentolor</a>
+        <a href="https://twitter.com/bentolor">@bentolor</a>
     </p>
 </section>
 
@@ -298,9 +298,9 @@ log.info( fullName.map( s -> "Hey " + s + "!" ).orElse( "Hey Stranger!" ) );</co
     <h2 class="slide-header">Native Javascript Support (Nashorn)</h2>
     <h5>Use / Run Javascript in your code:</h5>
     <pre><code class="java mb-30">ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName( "JavaScript" );
+ScriptEngine engine = manager.getEngineByName( "JavaScript" );
 
-        System.out.println( engine.eval( "function f() { return 1; }; f() + 1;" ) );</code></pre>
+System.out.println( engine.eval( "function f() { return 1; }; f() + 1;" ) );</code></pre>
 
     <h5>From command line</h5>
     <pre><code class="mb-30">jjs server.js</code></pre>
@@ -339,9 +339,9 @@ myString = (@NonNull String) myObject;</code></pre>
         <h2 class="slide-header">Parameter names</h2>
 
         <pre><code class="java mb-30">Method method = ParameterNames.class.getMethod( "main", String[].class );
-            for( final Parameter parameter: method.getParameters() ) {
-            System.out.println( "Parameter: " + parameter.getName() );
-            }</code></pre>
+for( final Parameter parameter: method.getParameters() ) {
+  System.out.println( "Parameter: " + parameter.getName() );
+}</code></pre>
     </section>
 
     <section>
@@ -385,9 +385,9 @@ myString = (@NonNull String) myObject;</code></pre>
         <h2 class="slide-header">jdeps</h2>
         <p>Class dependency analyzer</p>
 
-<pre><code class="mb-30">$ jdeps org.springframework.core-3.0.5.RELEASE.jar
-org.springframework.core-3.0.5.RELEASE.jar -> lib\rt.jar
-   org.springframework.core (org.springframework.core-3.0.5.RELEASE.jar)
+<pre><code class="mb-30">$ jdeps org.springframework.core-3.0.5.jar
+org.springframework.core-3.0.5.jar -> lib\rt.jar
+   org.springframework.core (org.springframework.core-3.0.5.jar)
       -> java.io
       -> java.lang
       -> java.lang.annotation
@@ -397,7 +397,7 @@ org.springframework.core-3.0.5.RELEASE.jar -> lib\rt.jar
       -> java.util.concurrent
       -> org.apache.commons.logging                         not found
       -> org.springframework.asm                            not found
-   org.springframework.core.annotation (org.springframework.core-3.0.5.RELEASE.jar)
+   org.springframework.core.annotation (org.springframework.core-3.0.5.jar)
       -> java.lang
       -> java.lang.annotation
       -> java.lang.reflect
@@ -416,6 +416,7 @@ org.springframework.core-3.0.5.RELEASE.jar -> lib\rt.jar
         <li><a href="http://www.javacodegeeks.com/2014/05/java-8-features-tutorial.html#new_java_tools">Java 8 Features – The ULTIMATE Guide</a></li>
         <li><a href="http://java.dzone.com/articles/whats-wrong-java-8-part-vi">Whats wrong with Java 8</a></li>
         <li><a href="http://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#StreamOps">Streams API</a></li>
+        <li><a href="https://github.com/java8/Java8InAction/">Java 8 in Action</a></li>
     </ul>
 </section>
 
