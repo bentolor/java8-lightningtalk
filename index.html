@@ -188,7 +188,7 @@ numbers.sort(Comparator.naturalOrder());</code></pre>
         <h2 class="slide-header">Interface <code>static</code> methods</h2>
         <pre><code class="java">private interface PersonFactory {
     // Interfaces now allow static methods
-    static Integer createPerson( String firstname, String lastname ) {
+    static Person createPerson( String firstname, String lastname ) {
         return new Person(firstname, lastname);
     }
 }</code></pre>
